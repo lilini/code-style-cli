@@ -1,0 +1,33 @@
+{
+  "name": "code-style-cli",
+  "version": "0.0.5",
+  "description": "code style checking when commit for git",
+  "main": "index.js",
+  "bin": {
+    "cs": "./bin/cli.js"
+  },
+  "keywords": [
+    "code style",
+    "git-hooks",
+    "fecs"
+  ],
+  "author": "lijing77 <lijing19920324@163.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.12"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "conf",
+    "hooks",
+    "index.js"
+  ],
+  "dependencies": {
+    "fecs": "1.6.0",
+    "optionator": "^0.8.2",
+    "chalk": "^2.4.2",
+    "minimatch": "^3.0.4",
+    "fs-extra": "^1.0.0"
+  }
+}

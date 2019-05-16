@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# code-style-cli PreCommit v0.0.5
+
+if type cs >/dev/null 2>&1;then
+    cs='cs'
+elif ./node_modules/.bin/cs >/dev/null 2>&1;then
+    cs='./node_modules/.bin/cs'
+else
+    echo "No cs found. Please try npm install code-style-cli first."
+    exit 1
+fi
+
+$cs --cached
