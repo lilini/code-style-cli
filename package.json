@@ -1,8 +1,11 @@
 {
   "name": "code-style-cli",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "code style checking when commit for git",
-  "git repository": "https://github.com/lilini/code-style-cli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lilini/code-style-cli"
+  },
   "main": "index.js",
   "bin": {
     "cs": "./bin/cli.js"
