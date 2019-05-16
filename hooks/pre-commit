@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# code-style-cli PreCommit v0.0.5
+# code-style-cli PreCommit v0.0.6
 
 if type cs >/dev/null 2>&1;then
     cs='cs'
