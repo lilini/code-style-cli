@@ -87,7 +87,9 @@ function transform(file, json, filter, options) {
 
     // filter error with modified lines
     let errors = file.errors.filter(error => {
-        if (typeof error.line === 'number' && !modifiedLines.has(error.line)) {
+        let errorType = error.origin && error.origin.type || '';
+
+        if ((typeof error.line === 'number' && !modifiedLines.has(error.line)) || errorType === 'WARN') {
             return false;
         }
         else {
