@@ -42,5 +42,55 @@ cs [options] [file.js..]
 
 ### 配置
 `.ignoreitr.js`文件支持用户自定义配置：
-- stopCommit：检查不通过时是否阻止commit；默认为true
-- ignore：配置检查时忽略的文件规则
+
+```sh
+    {
+	    // 检查不通过时是否阻止commit；默认为true
+	    "stopCommit": true,
+	    // 配置要检查的rule，open指定是否开启这个checker，warnIgnored指定是否忽略当前checker的warn提示，默认htmlcs的warn提示是忽略的
+	    "checkRules":{
+	        "htmlcs": {
+	            "open": true,
+	            "warnIgnored": true
+	        },
+	        "csshint": {
+	            "open": true,
+	            "warnIgnored": false
+	        },
+	        "eslint": {
+	            "open": true,
+	            "warnIgnored": false
+	        }
+	    },
+	    // 配置检查时忽略的文件规则
+	    "ignore": [
+	        "*.json",
+	        "fis.config.js"
+	    ]
+    }
+```
+
+### 注释方式豁免检查
+1、htmlcs豁免注释：
+
+```sh
+    <!-- htmlcs-disable rule1[,rule2,...] -->
+	    你要豁免的代码
+	<!-- htmlcs-enable rule1[,rule2,...] -->
+```
+
+2、csshint豁免注释：
+
+```sh
+    /* csshint-disable rule1[,rule2,...] */
+	    你要豁免的代码
+	/* csshint-enable rule1[,rule2,...] */
+```
+
+3、eslint豁免注释：
+
+```sh
+    /* eslint-disable rule1[,rule2,...] */
+	    你要豁免的代码
+	/* eslint-enable rule1[,rule2,...] */
+```

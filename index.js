@@ -15,13 +15,14 @@ const processExec = require('child_process').execSync;
 const version = require('./package').version;
 const DEFAULT_RC = require('./conf/ignoreitr.js');
 
-const ModifiedFiles = {};
-
 // Diff stdout expr
 const DIFF_REG = /(\n|^)diff --git a\/(\S+) b\/\2[^\n]*/gi;
 
 // Modified region expr
 const MODIFY_REG = /\n@@ -(\d+),\d+ \+(\d+),\d+ @@[^\n]*((\n[ +\-\\][^\n]*)*)/gi;
+
+let ModifiedFiles = {};
+let checkRulesConfig = {};
 
 /**
  * get modified lines
@@ -85,11 +86,22 @@ function transform(file, json, filter, options) {
     let item = {relative: file.relative};
     let modifiedLines = ModifiedFiles[file.path];
 
-    // filter error with modified lines
-    let errors = file.errors.filter(error => {
-        let errorType = error.origin && error.origin.type || '';
+    let Severity = {
+        WARN: 1,
+        ERROR: 2
+    };
 
-        if ((typeof error.line === 'number' && !modifiedLines.has(error.line)) || errorType === 'WARN') {
+    // filter error
+    let errors = file.errors.filter(error => {
+        let ruleConfig = checkRulesConfig[error.checker]
+
+        // 以下几种情况舍弃error：
+        // 未配置该checker检查
+        // 当前error不在本次提交的修改行内
+        // 当前error为warn且用户设置不开启warn提示
+        if (!ruleConfig || !ruleConfig.open
+            || (typeof error.line === 'number' && !modifiedLines.has(error.line))
+            || (error.origin && (error.origin.severity === Severity.WARN || error.origin.type === 'WARN') && ruleConfig.warnIgnored)) {
             return false;
         }
         else {
@@ -211,8 +223,11 @@ function writeRc(to, ...args) {
 function initIgnoreitr(options) {
     const rcPath = '.ignoreitr.js';
 
-    if (options.override || !fsExtra.existsSync(rcPath)) {
-        
+    if (fsExtra.existsSync(rcPath)) {
+        commit_version = fsExtra.readFileSync(rcPath).toString().match(/"version": "([\d\.]+)"/) && RegExp.$1;
+    }
+
+    if (options.override || !fsExtra.existsSync(rcPath) || version !== commit_version) {
         writeRc(rcPath, require('./conf/ignoreitr.js'), options.ignoreitr);
         return rcPath;
     }
@@ -239,6 +254,25 @@ function initPreCommit(options) {
     }
 }
 
+/**
+ * check ignoreitr has checkRule
+ * @return {boolean} has checkRule
+ */
+function hasCheckRule() {
+    let flag = false;
+
+    if (typeof checkRulesConfig !== 'object') {
+        return flag;
+    }
+
+    Object.keys(checkRulesConfig).forEach(key => {
+        if (checkRulesConfig[key] && checkRulesConfig[key]['open']) {
+            flag = true;
+        }
+    });
+
+    return flag;
+}
 
 /**
  * Index entry
@@ -288,20 +322,29 @@ module.exports = {
             this.rc = DEFAULT_RC;
         }
 
-        this.options = Object.assign(
-            Object.create(null),
-            { 
-                cached: false,
-                files: [],
-                rc: this.rc,
-                root: root,
-                type: 'js,css,html,less',
-                cwd: cwd
-            },
-            options
-        );
+        // 获取配置的检查rule
+        checkRulesConfig = this.rc && this.rc.checkRules || {};
 
-        this.fecsCheck(this.getModifiedFiles());
+        if (!hasCheckRule()) {
+            console.log("ignoreitr配置里没有要检查的规则！");
+            process.exit(0);
+        }
+        else {
+            this.options = Object.assign(
+                Object.create(null),
+                {
+                    cached: false,
+                    files: [],
+                    rc: this.rc,
+                    root: root,
+                    type: 'js,css,html,less',
+                    cwd: cwd
+                },
+                options
+            );
+
+            this.fecsCheck(this.getModifiedFiles());
+        }
     },
 
     /**
