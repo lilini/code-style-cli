@@ -1,6 +1,6 @@
 {
   "name": "code-style-cli",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "code style checking when commit for git",
   "repository": {
     "type": "git",

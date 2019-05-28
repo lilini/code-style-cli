@@ -223,6 +223,8 @@ function writeRc(to, ...args) {
 function initIgnoreitr(options) {
     const rcPath = '.ignoreitr.js';
 
+    let commit_version;
+
     if (fsExtra.existsSync(rcPath)) {
         commit_version = fsExtra.readFileSync(rcPath).toString().match(/"version": "([\d\.]+)"/) && RegExp.$1;
     }
